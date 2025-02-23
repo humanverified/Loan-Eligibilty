@@ -81,6 +81,6 @@ col1, col2 = st.columns([5, 1])
 with col1:
     st.markdown("### Created by Adwaith Kalathuru")
 with col2:
-    st.image(image0.jpeg", width=100)
+    st.image("image0.jpeg", width=100)
 
                                                                                                          
