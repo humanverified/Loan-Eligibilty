@@ -136,7 +136,6 @@ if st.button("Check Loan Eligibility"):
     ))
 
     conn.commit()
-    st.success("Your details have been automatically saved to the database!")
 
 # ---------------------------
 # FOOTER
