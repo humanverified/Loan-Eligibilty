@@ -11,6 +11,7 @@ cursor = conn.cursor()
 model = load('Credit_Check.joblib')
 
 st.title('Check your Loan Eligibility')
+full_name=st.text_input("Enter your Full Name")
 
 default_dob = datetime(2000, 1, 1)
 dob = st.date_input("Enter Date of Birth", value=default_dob,
