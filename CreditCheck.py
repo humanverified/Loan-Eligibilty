@@ -6,18 +6,11 @@ from joblib import load
 from datetime import datetime
 import psycopg2
 
-# Connect to Neon PostgreSQL
 conn = psycopg2.connect(st.secrets["DATABASE_URL"])
 cursor = conn.cursor()
-
-# Load model
 model = load('Credit_Check.joblib')
 
 st.title('Check your Loan Eligibility')
-
-# ---------------------------
-# USER INPUT SECTION
-# ---------------------------
 
 default_dob = datetime(2000, 1, 1)
 dob = st.date_input("Enter Date of Birth", value=default_dob,
@@ -62,7 +55,6 @@ cb_person_default_on_file_Y = 1 if cb_person_default_on_file == 'Y' else 0
 loan_status_input = st.selectbox('Loan Status', ['Fully Paid', 'Charged Off'])
 loan_status = 1 if loan_status_input == 'Fully Paid' else 0
 
-# Label encoding
 label_encoders = {
     "person_home_ownership": LabelEncoder(),
     "loan_intent": LabelEncoder(),
@@ -77,28 +69,22 @@ person_home_ownership_encoded = label_encoders["person_home_ownership"].transfor
 loan_intent_encoded = label_encoders["loan_intent"].transform([loan_intent])[0]
 loan_grade_encoded = label_encoders["loan_grade"].transform([loan_grade])[0]
 
-# Model input
 user_input = np.array([[person_age, person_income, person_home_ownership_encoded,
                         person_emp_length, loan_intent_encoded, loan_grade_encoded,
                         loan_int_rate, loan_status, loan_percent_income,
                         cb_person_default_on_file_N, cb_person_default_on_file_Y]])
 
-# ---------------------------
-# MAIN ACTION BUTTON
-# ---------------------------
 
 if st.button("Check Loan Eligibility"):
 
     predicted_loan_amount = model.predict(user_input)
 
-    # Show result
     if predicted_loan_amount[0] < 0:
         st.error("You are not eligible for a loan.")
         emi = 0
     else:
         st.write(f"### You can borrow up to: £{predicted_loan_amount[0]:,.2f}")
 
-        # EMI calculation
         principal_amount = predicted_loan_amount[0]
         monthly_interest_rate = (loan_int_rate / 100) / 12
         loan_tenure_months = loan_tenure
@@ -109,9 +95,6 @@ if st.button("Check Loan Eligibility"):
 
         st.write(f"### Your estimated monthly EMI is: £{emi:,.2f}")
 
-    # ---------------------------
-    # AUTO-SAVE TO DATABASE
-    # ---------------------------
     cursor.execute("""
         INSERT INTO loan_eligibility_status (
             Date_of_birth,
@@ -137,9 +120,6 @@ if st.button("Check Loan Eligibility"):
 
     conn.commit()
 
-# ---------------------------
-# FOOTER
-# ---------------------------
 
 st.markdown("<hr>", unsafe_allow_html=True)
 
